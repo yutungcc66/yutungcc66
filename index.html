@@ -1,339 +1,354 @@
-import React, { useState } from 'react';
-import { 
-  Home, 
-  Library, 
-  Heart, 
-  Plus, 
-  Search, 
-  Filter, 
-  BookOpen, 
-  Box, 
-  TrendingUp, 
-  Trash2, 
-  Edit2, 
-  Star, 
-  ShoppingBag,
-  ChevronRight,
-  Package,
-  Layers,
-  LayoutGrid,
-  Zap,
-  Award
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小窩藏館 - 數位收藏管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFCFE;
+            color: #4A447F;
+        }
 
-const App = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [filterType, setFilterType] = useState('all');
-  
-  // 數據資料庫：已為每本小說替換專屬美照
-  const [items, setItems] = useState([
-    { id: 1, type: 'novel', name: '四幕戲', author: '唐七', status: 'read', progress: 100, price: 350, image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400' },
-    { id: 2, type: '揉碎溫柔', name: '揉碎溫柔', author: '舒遠', status: 'reading', progress: 65, price: 320, image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=400' },
-    { id: 3, type: 'novel', name: '雙軌', author: '時久', status: 'read', progress: 100, price: 340, image: 'https://images.unsplash.com/photo-1474932430478-3a7fb9067bd0?auto=format&fit=crop&q=80&w=400' },
-    { id: 4, type: 'novel', name: '耀眼', author: '時久', status: 'wish', progress: 0, price: 330, image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=400' },
-    { id: 5, type: 'novel', name: '蝴蝶與鯨魚', author: '蜃中樓', status: 'read', progress: 100, price: 310, image: 'https://images.unsplash.com/photo-1550399105-c4db5fb85c18?auto=format&fit=crop&q=80&w=400' },
-    { id: 6, type: 'novel', name: '一笙一念', author: '時玖遠', status: 'read', progress: 100, price: 300, image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=400' },
-    { id: 7, type: 'novel', name: '偏偏寵愛', author: '藤羅為枝', status: 'read', progress: 100, price: 360, image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400' },
-    { id: 8, type: 'novel', name: '告白', author: '應橙', status: 'wish', progress: 0, price: 320, image: 'https://images.unsplash.com/photo-1491843384428-292a7ad75aee?auto=format&fit=crop&q=80&w=400' },
-    
-    // 時代少年團 (TNT) 週邊
-    { id: 101, type: 'merch', name: '馬嘉祺 親筆簽名小卡', category: '小卡', location: '防潮保險盒', price: 15000, image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400', isRare: true },
-    { id: 102, type: 'merch', name: '時代少年團《烏托邦》PB', category: '海報/寫真', location: '書架 A層', price: 1280, image: 'https://images.unsplash.com/photo-1607171742131-4a9207ad36d1?auto=format&fit=crop&q=80&w=400' },
-    { id: 103, type: 'merch', name: 'TNT 官方應援棒 (二代)', category: '應援物', location: '展示櫃 01', price: 950, image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&q=80&w=400' },
-    { id: 104, type: 'merch', name: '宋亞軒 生日限定禮盒', category: '禮盒', location: '書架 B層', price: 2100, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=400' },
-    { id: 105, type: 'merch', name: '嚴浩翔 拍立得簽名卡', category: '小卡', location: '卡冊 01', price: 880, image: 'https://images.unsplash.com/photo-1526218626217-dc65a29bb444?auto=format&fit=crop&q=80&w=400' },
-    { id: 106, type: 'merch', name: '丁程鑫 限定燙金明信片', category: '海報/寫真', location: '卡冊 02', price: 520, image: 'https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=400' },
-  ]);
+        .glass-gradient {
+            background: linear-gradient(135deg, #B2A4FF 0%, #C9BFFF 50%, #EBE7FF 100%);
+        }
 
-  const stats = {
-    total: items.length,
-    novels: items.filter(i => i.type === 'novel' || i.type === '揉碎溫柔').length,
-    merch: items.filter(i => i.type === 'merch').length,
-    totalValue: items.reduce((acc, curr) => acc + curr.price, 0)
-  };
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
 
-  const theme = {
-    bg: 'bg-[#FDFCFE]',
-    sidebar: 'bg-[#F6F4FF]',
-    primary: 'bg-[#B2A4FF]',
-    primaryHover: 'hover:bg-[#9988FF]',
-    text: 'text-[#4A447F]',
-    card: 'bg-white',
-    accent: 'text-[#8E82E6]',
-    border: 'border-[#EBE7FF]'
-  };
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(178, 164, 255, 0.2);
+        }
 
-  const filteredItems = filterType === 'all' 
-    ? items 
-    : items.filter(i => filterType === 'novel' ? (i.type === 'novel' || i.type === '揉碎溫柔') : i.type === filterType);
+        .transition-all-500 {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-  const renderDashboard = () => (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* 頂部英雄區域 */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#B2A4FF] via-[#C9BFFF] to-[#EBE7FF] p-8 sm:p-10 rounded-[3rem] shadow-2xl shadow-indigo-100 text-white">
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-xs font-bold mb-4">
-                <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
-                <span>收藏即時概況</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">你的珍藏宇宙</h2>
-              <p className="text-white/80 font-medium max-w-md">目前共管理著 {stats.total} 件心頭好，總估值已達 ${stats.totalValue.toLocaleString()}。</p>
-            </div>
-            <div className="flex gap-4">
-               <div className="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
-                  <p className="text-[10px] font-bold text-white/60 uppercase">小說</p>
-                  <p className="text-2xl font-black">{stats.novels}</p>
-               </div>
-               <div className="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
-                  <p className="text-[10px] font-bold text-white/60 uppercase">週邊</p>
-                  <p className="text-2xl font-black">{stats.merch}</p>
-               </div>
-            </div>
-          </div>
-        </div>
-        <div className="absolute top-[-20%] right-[-10%] w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-[-20%] left-[10%] w-60 h-60 bg-[#DED9FF]/20 rounded-full blur-2xl"></div>
-      </div>
+        /* 隱藏原生檔案上傳按鈕 */
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body class="selection:bg-[#B2A4FF]/20">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 動態數據列表 */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-bold text-[#4A447F] flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#B2A4FF]" /> 最近加入的藏品
-            </h3>
-            <button className="text-xs font-black text-[#B2A4FF] hover:underline uppercase tracking-wider">查看歷史</button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {items.slice(0, 6).map(item => (
-              <div key={item.id} className="flex items-center gap-4 p-5 rounded-[2rem] bg-white border border-[#F0EDFF] hover:border-[#B2A4FF] hover:shadow-xl hover:shadow-indigo-50 group transition-all duration-300">
-                <div className="relative">
-                  <img src={item.image} className="w-16 h-16 rounded-2xl object-cover shadow-inner bg-[#F6F4FF]" alt={item.name} />
-                  {item.isRare && (
-                    <div className="absolute -top-1 -right-1 p-1 bg-yellow-400 rounded-lg shadow-sm border-2 border-white">
-                      <Award className="w-3 h-3 text-white fill-white" />
+    <div class="flex min-h-screen">
+        <!-- 側邊導航欄 -->
+        <aside class="w-72 bg-[#F6F4FF] border-r border-[#EBE7FF] hidden lg:flex flex-col fixed h-full">
+            <div class="p-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-[1.25rem] bg-[#B2A4FF] flex items-center justify-center shadow-lg shadow-indigo-100 rotate-3">
+                        <i class="fas fa-book-open text-white text-xl"></i>
                     </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-black text-[#504A8E] group-hover:text-[#B2A4FF] transition-colors">{item.name}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] font-bold bg-[#F6F4FF] text-[#B2A4FF] px-2 py-0.5 rounded-full uppercase">
-                      {(item.type === 'novel' || item.type === '揉碎溫柔') ? '小說' : item.category}
-                    </span>
-                    <span className="text-[10px] text-slate-300 font-medium truncate max-w-[100px]">
-                      {(item.type === 'novel' || item.type === '揉碎溫柔') ? item.author : item.location}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-[#FBFBFF] flex items-center justify-center group-hover:bg-[#B2A4FF] transition-all">
-                  <ChevronRight className="w-4 h-4 text-[#DED9FF] group-hover:text-white" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 側邊資訊 */}
-        <div className="space-y-6">
-          <div className="bg-white p-8 rounded-[3rem] border border-[#F0EDFF] shadow-sm relative overflow-hidden">
-            <h3 className="text-lg font-bold text-[#4A447F] mb-6 flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-rose-400" /> 待收心願清單
-            </h3>
-            <div className="space-y-4 relative z-10">
-              {items.filter(i => i.status === 'wish').map(wish => (
-                <div key={wish.id} className="group p-5 rounded-3xl bg-[#FDFCFE] border border-[#F3F0FF] hover:bg-white hover:border-[#B2A4FF] hover:shadow-lg transition-all duration-300">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-black text-[#504A8E]">{wish.name}</span>
-                    <span className="text-[10px] font-black text-[#B2A4FF]">${wish.price}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-[#F3F0FF] rounded-full overflow-hidden">
-                      <div className="bg-rose-300 h-full w-[30%]"></div>
+                    <div>
+                        <h1 class="font-black text-xl tracking-tighter text-[#4A447F]">小窩藏館</h1>
+                        <p class="text-[10px] font-bold text-[#A69DCC] uppercase tracking-widest">My Vault v5.2</p>
                     </div>
-                    <span className="text-[9px] font-bold text-slate-300">儲蓄中</span>
-                  </div>
                 </div>
-              ))}
             </div>
-            <div className="absolute top-[-10%] right-[-10%] w-20 h-20 bg-rose-50 rounded-full blur-xl"></div>
-          </div>
 
-          <div className="p-8 rounded-[3rem] bg-[#F6F4FF] border border-[#EBE7FF] flex flex-col items-center text-center">
-             <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-md mb-4 rotate-6">
-                <Box className="w-7 h-7 text-[#B2A4FF]" />
-             </div>
-             <h4 className="text-sm font-black text-[#4A447F] mb-1">儲藏位狀態</h4>
-             <p className="text-[10px] text-[#A69DCC] font-bold mb-4 uppercase tracking-tighter">當前卡冊 01 空間即將全滿</p>
-             <button className="w-full py-3 bg-[#B2A4FF] text-white rounded-2xl text-xs font-black hover:bg-[#9988FF] transition-all shadow-lg shadow-indigo-100">
-               整理儲藏位
-             </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+            <nav class="flex-1 px-6 space-y-4">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm bg-white text-[#B2A4FF] shadow-sm">
+                    <i class="fas fa-home w-5"></i> 控制台
+                </button>
+                <button onclick="switchTab('collection')" id="nav-collection" class="w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm text-[#A69DCC] hover:bg-white hover:text-[#B2A4FF]">
+                    <i class="fas fa-th-large w-5"></i> 珍藏藝廊
+                </button>
+                <button onclick="switchTab('wishlist')" id="nav-wishlist" class="w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm text-[#A69DCC] hover:bg-white hover:text-[#B2A4FF]">
+                    <i class="fas fa-heart w-5"></i> 心願清單
+                </button>
+            </nav>
 
-  const renderGallery = () => (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 bg-white px-6 py-4 rounded-2xl border border-[#EEEBFF] w-full md:max-w-md shadow-sm transition-focus-within focus-within:border-[#B2A4FF] focus-within:ring-4 focus-within:ring-[#B2A4FF]/5">
-            <Search className="w-4 h-4 text-[#B2A4FF]" />
-            <input type="text" placeholder="搜尋小說或週邊商品..." className="bg-transparent border-none outline-none text-sm w-full placeholder:text-[#CBC5ED]" />
-          </div>
-          <div className="flex gap-2 w-full md:w-auto">
-            <button className="flex items-center justify-center gap-2 px-6 py-4 bg-white rounded-2xl border border-[#EEEBFF] text-sm font-bold text-[#7E76B5] hover:bg-[#F6F4FF] flex-1 md:flex-none transition-all shadow-sm">
-              <Filter className="w-4 h-4" /> 篩選
-            </button>
-            <button className="flex items-center justify-center gap-2 px-8 py-4 bg-[#B2A4FF] text-white rounded-2xl text-sm font-bold hover:bg-[#9988FF] flex-1 md:flex-none shadow-lg shadow-indigo-100 transition-all">
-              <Plus className="w-4 h-4" /> 新增收藏
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {[
-            { id: 'all', label: '全部顯示', icon: LayoutGrid },
-            { id: 'novel', label: '精選小說', icon: BookOpen },
-            { id: 'merch', label: '週邊藏品', icon: Layers }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterType(tab.id)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-                filterType === tab.id 
-                ? 'bg-[#B2A4FF] text-white shadow-md shadow-indigo-100' 
-                : 'bg-white text-[#7E76B5] border border-[#EEEBFF] hover:border-[#B2A4FF]'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" /> {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {filteredItems.map(item => (
-          <div key={item.id} className="group bg-white rounded-[2rem] overflow-hidden border border-[#F0EDFF] hover:border-[#B2A4FF] transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-100/50">
-            <div className="aspect-[3/4] relative overflow-hidden bg-[#F6F4FF]">
-              <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute top-4 left-4">
-                <span className={`text-[10px] font-black uppercase tracking-tighter px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md ${
-                  (item.type === 'novel' || item.type === '揉碎溫柔') ? 'bg-[#B2A4FF]/90 text-white' : 'bg-pink-400/90 text-white'
-                }`}>
-                  {(item.type === 'novel' || item.type === '揉碎溫柔') ? '小說' : item.category}
-                </span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#4A447F]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                 <div className="flex gap-2 w-full">
-                    <button className="flex-1 py-2 bg-white/90 backdrop-blur rounded-xl text-[#504A8E] hover:bg-white transition-colors flex justify-center"><Edit2 className="w-4 h-4" /></button>
-                    <button className="flex-1 py-2 bg-rose-500/90 backdrop-blur rounded-xl text-white hover:bg-rose-500 transition-colors flex justify-center"><Trash2 className="w-4 h-4" /></button>
-                 </div>
-              </div>
+            <div class="p-8" id="auth-section">
+                <!-- 登入前 -->
+                <button id="btn-login" onclick="loginWithGoogle()" class="w-full py-4 bg-[#B2A4FF] text-white rounded-[1.25rem] font-black text-sm shadow-lg shadow-indigo-100 hover:bg-[#9988FF] transition-all">
+                    <i class="fab fa-google mr-2"></i> Google 登入
+                </button>
+                <!-- 登入後內容將由 JS 動態顯示 -->
             </div>
-            <div className="p-5">
-              <h3 className="font-black text-[#4A447F] text-sm truncate mb-2">{item.name}</h3>
-              {(item.type === 'novel' || item.type === '揉碎溫柔') ? (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] text-[#A69DCC] font-bold">
-                    <span>{item.author}</span>
-                    <span>{item.progress}%</span>
-                  </div>
-                  <div className="w-full bg-[#F3F0FF] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[#B2A4FF] h-full transition-all duration-1000" style={{ width: `${item.progress}%` }}></div>
-                  </div>
+        </aside>
+
+        <!-- 主要內容區 -->
+        <main class="flex-1 ml-0 lg:ml-72 flex flex-col h-screen overflow-hidden">
+            <header class="h-24 bg-white/50 backdrop-blur-xl flex items-center px-10 justify-between sticky top-0 z-20">
+                <div>
+                    <h2 id="current-tab-title" class="font-black text-2xl text-[#4A447F] tracking-tight">數據中心</h2>
+                    <p id="user-greeting" class="text-xs text-[#A69DCC] font-bold">歡迎使用，請先登入以同步您的收藏。</p>
                 </div>
-              ) : (
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Box className="w-3 h-3 text-[#B2A4FF]" />
-                    <span className="text-[10px] font-bold text-[#A69DCC]">{item.location}</span>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <p className="text-xs font-black text-[#B2A4FF]">${item.price.toLocaleString()}</p>
-                    {item.isRare && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
-                  </div>
+                <div id="user-profile" class="hidden flex items-center gap-4 bg-white p-2 pr-5 rounded-2xl border border-[#F0EDFF] shadow-sm">
+                    <img id="user-avatar" src="" class="w-10 h-10 rounded-xl bg-gray-200" alt="Avatar">
+                    <div>
+                        <p id="user-name" class="text-xs font-black text-[#4A447F]">未登入</p>
+                        <p class="text-[10px] font-bold text-green-400">在線</p>
+                    </div>
                 </div>
-              )}
+            </header>
+
+            <div id="content-area" class="flex-1 overflow-y-auto p-6 lg:p-10 pb-20">
+                <!-- Dashboard Content (Default) -->
+                <div id="tab-dashboard" class="space-y-8 animate-in fade-in duration-700">
+                    <div class="relative overflow-hidden glass-gradient p-8 sm:p-10 rounded-[3rem] shadow-2xl shadow-indigo-100 text-white">
+                        <div class="relative z-10">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-xs font-bold mb-4">
+                                        <i class="fas fa-bolt text-yellow-300"></i> <span>即時概況</span>
+                                    </div>
+                                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight mb-2">你的珍藏宇宙</h2>
+                                    <p class="text-white/80 font-medium max-w-md">登入後即可查看您的專屬數據與市值統計。</p>
+                                </div>
+                                <div class="flex gap-4">
+                                    <div class="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
+                                        <p class="text-[10px] font-bold text-white/60 uppercase">藏品總數</p>
+                                        <p id="stat-total" class="text-2xl font-black">0</p>
+                                    </div>
+                                    <div class="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
+                                        <p class="text-[10px] font-bold text-white/60 uppercase">預計市值</p>
+                                        <p id="stat-value" class="text-2xl font-black">$0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近收藏 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-6">
+                            <h3 class="text-lg font-bold text-[#4A447F] flex items-center gap-2">
+                                <i class="fas fa-star text-[#B2A4FF]"></i> 最近加入的藏品
+                            </h3>
+                            <div id="recent-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- 動態載入 -->
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-white p-8 rounded-[3rem] border border-[#F0EDFF] shadow-sm">
+                                <h3 class="text-lg font-bold text-[#4A447F] mb-6 flex items-center gap-2">
+                                    <i class="fas fa-shopping-bag text-rose-400"></i> 新增收藏
+                                </h3>
+                                <div class="space-y-4">
+                                    <input type="text" id="new-item-name" placeholder="藏品名稱" class="w-full px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
+                                    <select id="new-item-type" class="w-full px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
+                                        <option value="novel">經典小說</option>
+                                        <option value="merch">週邊商品</option>
+                                    </select>
+                                    <div class="flex gap-2">
+                                        <input type="number" id="new-item-price" placeholder="價格" class="flex-1 px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
+                                        <label for="file-input" class="px-4 py-3 bg-[#EBE7FF] text-[#B2A4FF] rounded-xl cursor-pointer hover:bg-[#DED9FF] transition-all">
+                                            <i class="fas fa-camera"></i>
+                                        </label>
+                                        <input type="file" id="file-input" accept="image/*">
+                                    </div>
+                                    <button onclick="handleUpload()" class="w-full py-3 bg-[#B2A4FF] text-white rounded-xl font-bold hover:bg-[#9988FF] transition-all">上傳收藏</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Content (Hidden by default) -->
+                <div id="tab-collection" class="hidden space-y-6">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 bg-white px-6 py-4 rounded-2xl border border-[#EEEBFF] w-full md:max-w-md shadow-sm">
+                            <i class="fas fa-search text-[#B2A4FF]"></i>
+                            <input type="text" placeholder="搜尋藏品..." class="bg-transparent border-none outline-none text-sm w-full">
+                        </div>
+                    </div>
+                    <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <!-- 動態載入 -->
+                    </div>
+                </div>
             </div>
-          </div>
-        ))}
-      </div>
+        </main>
     </div>
-  );
 
-  return (
-    <div className={`min-h-screen ${theme.bg} flex text-[#4A447F] font-sans selection:bg-[#B2A4FF]/20`}>
-      <aside className={`w-72 ${theme.sidebar} border-r border-[#EBE7FF] hidden lg:flex flex-col z-30`}>
-        <div className="p-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-[1.25rem] bg-[#B2A4FF] flex items-center justify-center shadow-lg shadow-indigo-100 rotate-3">
-              <Library className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="font-black text-xl tracking-tighter text-[#4A447F]">小窩藏館</h1>
-              <p className="text-[10px] font-bold text-[#A69DCC] uppercase tracking-widest">My Vault v5.1</p>
-            </div>
-          </div>
-        </div>
-        <nav className="flex-1 px-6 space-y-4">
-          {[
-            { id: 'dashboard', label: '中心控制台', icon: Home },
-            { id: 'collection', label: '珍藏藝廊', icon: Library },
-            { id: 'wishlist', label: '心願清單', icon: Heart }
-          ].map(nav => (
-            <button 
-              key={nav.id}
-              onClick={() => setActiveTab(nav.id)}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm ${
-                activeTab === nav.id 
-                ? 'bg-white text-[#B2A4FF] shadow-sm' 
-                : 'text-[#A69DCC] hover:bg-white hover:text-[#B2A4FF]'
-              }`}
-            >
-              <nav.icon className={`w-5 h-5 ${activeTab === nav.id ? 'text-[#B2A4FF]' : 'text-[#CBC5ED]'}`} /> {nav.label}
-            </button>
-          ))}
-        </nav>
-        <div className="p-8">
-          <div className="p-5 bg-white rounded-3xl border border-[#F0EDFF] text-center">
-            <p className="text-xs font-bold text-[#A69DCC] mb-2">已使用空間</p>
-            <div className="w-full bg-[#F3F0FF] h-2 rounded-full overflow-hidden mb-3">
-              <div className="bg-[#B2A4FF] h-full" style={{ width: '65%' }}></div>
-            </div>
-            <button className="text-[10px] font-black text-[#B2A4FF] uppercase tracking-wider">升級存儲</button>
-          </div>
-        </div>
-      </aside>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="h-24 bg-white/50 backdrop-blur-xl flex items-center px-10 justify-between z-20">
-          <div>
-             <h2 className="font-black text-2xl text-[#4A447F] tracking-tight">
-               {activeTab === 'dashboard' && '數據中心'}
-               {activeTab === 'collection' && '我的珍藏'}
-               {activeTab === 'wishlist' && '心願中心'}
-             </h2>
-             <p className="text-xs text-[#A69DCC] font-bold">歡迎回來，今天也要好好愛護它們喔！</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white p-2 pr-5 rounded-2xl border border-[#F0EDFF] shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#B2A4FF] to-[#DED9FF]"></div>
-            <div>
-              <p className="text-xs font-black text-[#4A447F]">Admin_User</p>
-              <p className="text-[10px] font-bold text-green-400">在線</p>
-            </div>
-          </div>
-        </header>
+        // Firebase 設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5fqeQRhXBD96sj1HUEfquEmLTtDxZGAQ",
+            authDomain: "yutungcc66.firebaseapp.com",
+            projectId: "yutungcc66",
+            storageBucket: "yutungcc66.firebasestorage.app",
+            messagingSenderId: "922962227640",
+            appId: "1:922962227640:web:70376013869198b982df4d"
+        };
 
-        <div className="flex-1 overflow-y-auto p-10 pb-20 lg:pb-10">
-          {activeTab === 'dashboard' ? renderDashboard() : renderGallery()}
-        </div>
-      </main>
-    </div>
-  );
-};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-export default App;
+        let currentUser = null;
+        let base64Image = null;
+
+        // --- 核心功能: 登入 ---
+        window.loginWithGoogle = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert("登入失敗: " + error.message);
+            }
+        };
+
+        window.logout = async () => {
+            await signOut(auth);
+            location.reload();
+        };
+
+        // --- 核心功能: 切換頁面 ---
+        window.switchTab = (tabId) => {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-collection').classList.add('hidden');
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // 更新按鈕樣式
+            ['dashboard', 'collection', 'wishlist'].forEach(id => {
+                const navBtn = document.getElementById('nav-' + id);
+                if (navBtn) {
+                    navBtn.classList.remove('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
+                    navBtn.classList.add('text-[#A69DCC]');
+                }
+            });
+            document.getElementById('nav-' + tabId).classList.add('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
+            document.getElementById('current-tab-title').innerText = tabId === 'dashboard' ? '數據中心' : '我的珍藏';
+        };
+
+        // --- 核心功能: 監聽資料庫 ---
+        const listenToCollection = (user) => {
+            const q = query(
+                collection(db, "collections"), 
+                where("userId", "==", user.uid)
+            );
+
+            onSnapshot(q, (snapshot) => {
+                const items = [];
+                let totalValue = 0;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    items.push({ id: doc.id, ...data });
+                    totalValue += Number(data.price || 0);
+                });
+
+                updateUI(items, totalValue);
+            });
+        };
+
+        const updateUI = (items, totalValue) => {
+            // 更新統計數據
+            document.getElementById('stat-total').innerText = items.length;
+            document.getElementById('stat-value').innerText = `$${totalValue.toLocaleString()}`;
+
+            // 更新畫廊
+            const galleryGrid = document.getElementById('gallery-grid');
+            const recentList = document.getElementById('recent-items-list');
+            galleryGrid.innerHTML = '';
+            recentList.innerHTML = '';
+
+            items.forEach(item => {
+                const cardHtml = `
+                    <div class="group bg-white rounded-[2rem] overflow-hidden border border-[#F0EDFF] hover:border-[#B2A4FF] transition-all-500 card-hover">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-[#F6F4FF]">
+                            <img src="${item.image || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4">
+                                <span class="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl shadow-lg bg-[#B2A4FF]/90 text-white">
+                                    ${item.type === 'novel' ? '小說' : '週邊'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-black text-[#4A447F] text-sm truncate mb-2">${item.name}</h3>
+                            <p class="text-xs font-black text-[#B2A4FF]">$${Number(item.price).toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+                galleryGrid.innerHTML += cardHtml;
+            });
+
+            // 最近收藏 (取前 4 個)
+            items.slice(0, 4).forEach(item => {
+                const rowHtml = `
+                    <div class="flex items-center gap-4 p-5 rounded-[2rem] bg-white border border-[#F0EDFF] hover:shadow-xl transition-all group">
+                        <img src="${item.image}" class="w-16 h-16 rounded-2xl object-cover">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-black text-[#504A8E]">${item.name}</h4>
+                            <span class="text-[9px] font-bold bg-[#F6F4FF] text-[#B2A4FF] px-2 py-0.5 rounded-full uppercase">${item.type}</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-[#DED9FF]"></i>
+                    </div>
+                `;
+                recentList.innerHTML += rowHtml;
+            });
+        };
+
+        // --- 核心功能: 圖片轉 Base64 ---
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                base64Image = reader.result;
+                alert("圖片準備就緒！");
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // --- 核心功能: 上傳資料 ---
+        window.handleUpload = async () => {
+            if (!currentUser) return alert("請先登入！");
+            
+            const name = document.getElementById('new-item-name').value;
+            const type = document.getElementById('new-item-type').value;
+            const price = document.getElementById('new-item-price').value;
+
+            if (!name || !price || !base64Image) return alert("請填寫完整資訊並選擇圖片");
+
+            try {
+                await addDoc(collection(db, "collections"), {
+                    name,
+                    type,
+                    price: Number(price),
+                    image: base64Image,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+                // 清空欄位
+                document.getElementById('new-item-name').value = '';
+                document.getElementById('new-item-price').value = '';
+                base64Image = null;
+                alert("收藏成功！");
+            } catch (e) {
+                alert("上傳失敗: " + e.message);
+            }
+        };
+
+        // 監聽 Auth 狀態
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').src = user.photoURL;
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-greeting').innerText = `哈囉 ${user.displayName.split(' ')[0]}，今天也要好好愛護收藏喔！`;
+                document.getElementById('auth-section').innerHTML = `
+                    <button onclick="logout()" class="w-full py-4 bg-white text-rose-400 border border-rose-100 rounded-[1.25rem] font-black text-sm hover:bg-rose-50 transition-all">
+                        登出帳號
+                    </button>
+                `;
+                listenToCollection(user);
+            }
+        });
+    </script>
+</body>
+</html>
