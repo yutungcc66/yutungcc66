@@ -24,17 +24,47 @@
         }
 
         .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(178, 164, 255, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 30px -5px rgba(178, 164, 255, 0.25);
         }
 
         .transition-all-500 {
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 隱藏原生檔案上傳按鈕 */
+        /* 檔案上傳預覽區 */
+        .upload-preview {
+            width: 100%;
+            height: 150px;
+            border-radius: 1.5rem;
+            object-fit: cover;
+            display: none;
+            margin-bottom: 1rem;
+        }
+        
         #file-input {
             display: none;
+        }
+
+        /* 玻璃擬態加強 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #B2A4FF;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -42,22 +72,22 @@
 
     <div class="flex min-h-screen">
         <!-- 側邊導航欄 -->
-        <aside class="w-72 bg-[#F6F4FF] border-r border-[#EBE7FF] hidden lg:flex flex-col fixed h-full">
+        <aside class="w-72 bg-[#F6F4FF] border-r border-[#EBE7FF] hidden lg:flex flex-col fixed h-full z-30">
             <div class="p-10">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-[1.25rem] bg-[#B2A4FF] flex items-center justify-center shadow-lg shadow-indigo-100 rotate-3">
-                        <i class="fas fa-book-open text-white text-xl"></i>
+                        <i class="fas fa-gem text-white text-xl"></i>
                     </div>
                     <div>
                         <h1 class="font-black text-xl tracking-tighter text-[#4A447F]">小窩藏館</h1>
-                        <p class="text-[10px] font-bold text-[#A69DCC] uppercase tracking-widest">My Vault v5.2</p>
+                        <p class="text-[10px] font-bold text-[#A69DCC] uppercase tracking-widest">Digital Vault v6.0</p>
                     </div>
                 </div>
             </div>
 
             <nav class="flex-1 px-6 space-y-4">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm bg-white text-[#B2A4FF] shadow-sm">
-                    <i class="fas fa-home w-5"></i> 控制台
+                    <i class="fas fa-chart-pie w-5"></i> 控制台
                 </button>
                 <button onclick="switchTab('collection')" id="nav-collection" class="w-full flex items-center gap-4 px-6 py-4 rounded-[1.25rem] transition-all font-black text-sm text-[#A69DCC] hover:bg-white hover:text-[#B2A4FF]">
                     <i class="fas fa-th-large w-5"></i> 珍藏藝廊
@@ -67,12 +97,11 @@
                 </button>
             </nav>
 
-            <div class="p-8" id="auth-section">
-                <!-- 登入前 -->
-                <button id="btn-login" onclick="loginWithGoogle()" class="w-full py-4 bg-[#B2A4FF] text-white rounded-[1.25rem] font-black text-sm shadow-lg shadow-indigo-100 hover:bg-[#9988FF] transition-all">
+            <div class="p-8" id="auth-sidebar-section">
+                <!-- 初始狀態顯示登入按鈕 -->
+                <button id="btn-login-main" onclick="loginWithGoogle()" class="w-full py-4 bg-[#B2A4FF] text-white rounded-[1.25rem] font-black text-sm shadow-lg shadow-indigo-100 hover:bg-[#9988FF] transition-all">
                     <i class="fab fa-google mr-2"></i> Google 登入
                 </button>
-                <!-- 登入後內容將由 JS 動態顯示 -->
             </div>
         </aside>
 
@@ -80,91 +109,132 @@
         <main class="flex-1 ml-0 lg:ml-72 flex flex-col h-screen overflow-hidden">
             <header class="h-24 bg-white/50 backdrop-blur-xl flex items-center px-10 justify-between sticky top-0 z-20">
                 <div>
-                    <h2 id="current-tab-title" class="font-black text-2xl text-[#4A447F] tracking-tight">數據中心</h2>
-                    <p id="user-greeting" class="text-xs text-[#A69DCC] font-bold">歡迎使用，請先登入以同步您的收藏。</p>
+                    <h2 id="current-tab-title" class="font-black text-2xl text-[#4A447F] tracking-tight">控制台</h2>
+                    <p id="user-greeting" class="text-xs text-[#A69DCC] font-bold">歡迎使用，請先登入以開啟數位藏館。</p>
                 </div>
-                <div id="user-profile" class="hidden flex items-center gap-4 bg-white p-2 pr-5 rounded-2xl border border-[#F0EDFF] shadow-sm">
+                <div id="user-profile-header" class="hidden flex items-center gap-4 bg-white p-2 pr-5 rounded-2xl border border-[#F0EDFF] shadow-sm">
                     <img id="user-avatar" src="" class="w-10 h-10 rounded-xl bg-gray-200" alt="Avatar">
                     <div>
-                        <p id="user-name" class="text-xs font-black text-[#4A447F]">未登入</p>
-                        <p class="text-[10px] font-bold text-green-400">在線</p>
+                        <p id="user-name" class="text-xs font-black text-[#4A447F]">載入中...</p>
+                        <p class="text-[10px] font-bold text-green-400">已連線</p>
                     </div>
                 </div>
             </header>
 
             <div id="content-area" class="flex-1 overflow-y-auto p-6 lg:p-10 pb-20">
-                <!-- Dashboard Content (Default) -->
+                
+                <!-- 1. Dashboard Tab -->
                 <div id="tab-dashboard" class="space-y-8 animate-in fade-in duration-700">
-                    <div class="relative overflow-hidden glass-gradient p-8 sm:p-10 rounded-[3rem] shadow-2xl shadow-indigo-100 text-white">
+                    <!-- 英雄區看板 -->
+                    <div class="relative overflow-hidden glass-gradient p-8 sm:p-12 rounded-[3rem] shadow-2xl shadow-indigo-100 text-white">
                         <div class="relative z-10">
-                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
                                 <div>
                                     <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-xs font-bold mb-4">
-                                        <i class="fas fa-bolt text-yellow-300"></i> <span>即時概況</span>
+                                        <i class="fas fa-sparkles text-yellow-300"></i> <span>你的數位資產概況</span>
                                     </div>
-                                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight mb-2">你的珍藏宇宙</h2>
-                                    <p class="text-white/80 font-medium max-w-md">登入後即可查看您的專屬數據與市值統計。</p>
+                                    <h2 class="text-3xl sm:text-5xl font-black tracking-tight mb-4">歡迎來到珍藏宇宙</h2>
+                                    <p class="text-white/80 font-medium max-w-lg leading-relaxed">管理您心愛的小說與時代少年團週邊，即時掌握每一分價值的增長。</p>
                                 </div>
                                 <div class="flex gap-4">
-                                    <div class="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
-                                        <p class="text-[10px] font-bold text-white/60 uppercase">藏品總數</p>
-                                        <p id="stat-total" class="text-2xl font-black">0</p>
+                                    <div class="px-8 py-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] text-center min-w-[130px]">
+                                        <p class="text-[10px] font-bold text-white/60 uppercase mb-1">藏品總數</p>
+                                        <p id="stat-total" class="text-3xl font-black">0</p>
                                     </div>
-                                    <div class="px-6 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl text-center min-w-[100px]">
-                                        <p class="text-[10px] font-bold text-white/60 uppercase">預計市值</p>
-                                        <p id="stat-value" class="text-2xl font-black">$0</p>
+                                    <div class="px-8 py-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] text-center min-w-[130px]">
+                                        <p class="text-[10px] font-bold text-white/60 uppercase mb-1">總預算值</p>
+                                        <p id="stat-value" class="text-3xl font-black">$0</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="absolute -top-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
                     </div>
 
-                    <!-- 最近收藏 -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- 左側：最近加入 -->
                         <div class="lg:col-span-2 space-y-6">
-                            <h3 class="text-lg font-bold text-[#4A447F] flex items-center gap-2">
-                                <i class="fas fa-star text-[#B2A4FF]"></i> 最近加入的藏品
+                            <h3 class="text-xl font-black text-[#4A447F] flex items-center gap-2 px-2">
+                                <i class="fas fa-clock text-[#B2A4FF]"></i> 最近入庫
                             </h3>
-                            <div id="recent-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- 動態載入 -->
+                            <div id="recent-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <!-- 由 JS 動態渲染 -->
+                                <div class="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-[#DED9FF]">
+                                    <p class="text-[#A69DCC] font-bold">尚未有任何藏品，快去上傳吧！</p>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- 右側：新增表單 -->
                         <div class="space-y-6">
-                            <div class="bg-white p-8 rounded-[3rem] border border-[#F0EDFF] shadow-sm">
-                                <h3 class="text-lg font-bold text-[#4A447F] mb-6 flex items-center gap-2">
-                                    <i class="fas fa-shopping-bag text-rose-400"></i> 新增收藏
+                            <div class="bg-white p-8 rounded-[3rem] border border-[#F0EDFF] shadow-sm glass-card">
+                                <h3 class="text-xl font-black text-[#4A447F] mb-6 flex items-center gap-2">
+                                    <i class="fas fa-plus-circle text-rose-400"></i> 快速新增
                                 </h3>
-                                <div class="space-y-4">
-                                    <input type="text" id="new-item-name" placeholder="藏品名稱" class="w-full px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
-                                    <select id="new-item-type" class="w-full px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
-                                        <option value="novel">經典小說</option>
-                                        <option value="merch">週邊商品</option>
-                                    </select>
-                                    <div class="flex gap-2">
-                                        <input type="number" id="new-item-price" placeholder="價格" class="flex-1 px-4 py-3 rounded-xl bg-[#F6F4FF] border-none text-sm outline-none">
-                                        <label for="file-input" class="px-4 py-3 bg-[#EBE7FF] text-[#B2A4FF] rounded-xl cursor-pointer hover:bg-[#DED9FF] transition-all">
-                                            <i class="fas fa-camera"></i>
-                                        </label>
-                                        <input type="file" id="file-input" accept="image/*">
+                                <div class="space-y-5">
+                                    <img id="upload-preview-img" class="upload-preview" src="">
+                                    
+                                    <div>
+                                        <label class="text-[10px] font-bold text-[#A69DCC] uppercase ml-2 mb-1 block">藏品名稱</label>
+                                        <input type="text" id="new-item-name" placeholder="例如：四幕戲 或 馬嘉祺小卡" class="w-full px-5 py-4 rounded-2xl bg-[#F6F4FF] border-none text-sm outline-none focus:ring-2 ring-[#B2A4FF]/20 transition-all">
                                     </div>
-                                    <button onclick="handleUpload()" class="w-full py-3 bg-[#B2A4FF] text-white rounded-xl font-bold hover:bg-[#9988FF] transition-all">上傳收藏</button>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-[#A69DCC] uppercase ml-2 mb-1 block">類型</label>
+                                            <select id="new-item-type" class="w-full px-5 py-4 rounded-2xl bg-[#F6F4FF] border-none text-sm outline-none appearance-none">
+                                                <option value="novel">經典小說</option>
+                                                <option value="merch">週邊商品</option>
+                                                <option value="other">其他珍藏</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-[#A69DCC] uppercase ml-2 mb-1 block">入手價格</label>
+                                            <input type="number" id="new-item-price" placeholder="價格" class="w-full px-5 py-4 rounded-2xl bg-[#F6F4FF] border-none text-sm outline-none focus:ring-2 ring-[#B2A4FF]/20 transition-all">
+                                        </div>
+                                    </div>
+
+                                    <label for="file-input" class="flex items-center justify-center gap-3 w-full py-4 border-2 border-dashed border-[#DED9FF] text-[#B2A4FF] rounded-2xl cursor-pointer hover:bg-[#F6F4FF] transition-all-500">
+                                        <i class="fas fa-image"></i>
+                                        <span class="text-sm font-bold" id="upload-status-text">選擇照片 (Base64)</span>
+                                    </label>
+                                    <input type="file" id="file-input" accept="image/*">
+
+                                    <button id="btn-submit" onclick="handleUpload()" class="w-full py-4 bg-[#B2A4FF] text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-100 hover:bg-[#9988FF] transition-all flex items-center justify-center gap-2">
+                                        <span>確認上傳</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gallery Content (Hidden by default) -->
-                <div id="tab-collection" class="hidden space-y-6">
-                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 bg-white px-6 py-4 rounded-2xl border border-[#EEEBFF] w-full md:max-w-md shadow-sm">
+                <!-- 2. Gallery Tab -->
+                <div id="tab-collection" class="hidden space-y-8 animate-in fade-in duration-700">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex items-center gap-4 bg-white px-8 py-5 rounded-3xl border border-[#EEEBFF] w-full md:max-w-xl shadow-sm focus-within:ring-4 ring-[#B2A4FF]/10 transition-all">
                             <i class="fas fa-search text-[#B2A4FF]"></i>
-                            <input type="text" placeholder="搜尋藏品..." class="bg-transparent border-none outline-none text-sm w-full">
+                            <input type="text" id="gallery-search" placeholder="搜尋您的藏品倉庫..." class="bg-transparent border-none outline-none text-sm w-full font-medium">
+                        </div>
+                        <div class="flex gap-2 bg-[#F6F4FF] p-1.5 rounded-2xl">
+                             <button class="px-6 py-2.5 bg-white rounded-xl shadow-sm text-xs font-black text-[#B2A4FF]">全部</button>
+                             <button class="px-6 py-2.5 text-xs font-black text-[#A69DCC] hover:text-[#B2A4FF]">小說</button>
+                             <button class="px-6 py-2.5 text-xs font-black text-[#A69DCC] hover:text-[#B2A4FF]">週邊</button>
                         </div>
                     </div>
-                    <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        <!-- 動態載入 -->
+                    
+                    <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                        <!-- 由 JS 動態渲染 -->
                     </div>
+                </div>
+
+                <!-- 3. Wishlist Tab (Placeholder) -->
+                <div id="tab-wishlist" class="hidden py-40 text-center animate-in fade-in">
+                    <div class="w-24 h-24 bg-[#F6F4FF] rounded-full flex items-center justify-center mx-auto mb-6 text-[#B2A4FF] text-3xl">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h2 class="text-2xl font-black mb-2">心願清單開發中</h2>
+                    <p class="text-[#A69DCC] font-bold">未來將支援追蹤待買清單與價格預警功能。</p>
                 </div>
             </div>
         </main>
@@ -174,9 +244,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-        // Firebase 設定
+        // 1. Firebase 初始化配置
         const firebaseConfig = {
             apiKey: "AIzaSyB5fqeQRhXBD96sj1HUEfquEmLTtDxZGAQ",
             authDomain: "yutungcc66.firebaseapp.com",
@@ -194,45 +264,60 @@
         let currentUser = null;
         let base64Image = null;
 
-        // --- 核心功能: 登入 ---
+        // --- Auth 功能 ---
         window.loginWithGoogle = async () => {
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                alert("登入失敗: " + error.message);
+                console.error("Login Error:", error);
+                alert("登入過程發生錯誤，請稍後再試。");
             }
         };
 
         window.logout = async () => {
-            await signOut(auth);
-            location.reload();
+            if(confirm("確定要登出小窩藏館嗎？")) {
+                await signOut(auth);
+                location.reload();
+            }
         };
 
-        // --- 核心功能: 切換頁面 ---
+        // --- Tab 切換功能 ---
         window.switchTab = (tabId) => {
+            // 隱藏所有
             document.getElementById('tab-dashboard').classList.add('hidden');
             document.getElementById('tab-collection').classList.add('hidden');
+            document.getElementById('tab-wishlist').classList.add('hidden');
+            
+            // 顯示目標
             document.getElementById('tab-' + tabId).classList.remove('hidden');
 
-            // 更新按鈕樣式
-            ['dashboard', 'collection', 'wishlist'].forEach(id => {
-                const navBtn = document.getElementById('nav-' + id);
-                if (navBtn) {
-                    navBtn.classList.remove('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
-                    navBtn.classList.add('text-[#A69DCC]');
+            // 更新側邊欄按鈕樣式
+            const tabs = ['dashboard', 'collection', 'wishlist'];
+            tabs.forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                if (id === tabId) {
+                    btn.classList.add('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
+                    btn.classList.remove('text-[#A69DCC]');
+                } else {
+                    btn.classList.remove('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
+                    btn.classList.add('text-[#A69DCC]');
                 }
             });
-            document.getElementById('nav-' + tabId).classList.add('bg-white', 'text-[#B2A4FF]', 'shadow-sm');
-            document.getElementById('current-tab-title').innerText = tabId === 'dashboard' ? '數據中心' : '我的珍藏';
+
+            // 更新標題
+            const titles = { 'dashboard': '控制台', 'collection': '我的珍藏', 'wishlist': '心願清單' };
+            document.getElementById('current-tab-title').innerText = titles[tabId];
         };
 
-        // --- 核心功能: 監聽資料庫 ---
-        const listenToCollection = (user) => {
+        // --- 資料處理與監聽 ---
+        const startDataSync = (user) => {
+            // 建立查詢：只看當前使用者的資料，並按建立時間排序
             const q = query(
                 collection(db, "collections"), 
                 where("userId", "==", user.uid)
             );
 
+            // 即時監聽 Firestore
             onSnapshot(q, (snapshot) => {
                 const items = [];
                 let totalValue = 0;
@@ -242,79 +327,111 @@
                     totalValue += Number(data.price || 0);
                 });
 
-                updateUI(items, totalValue);
+                // 按日期手動排序 (Firestore 若無複合索引需手動排)
+                items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                renderUI(items, totalValue);
             });
         };
 
-        const updateUI = (items, totalValue) => {
-            // 更新統計數據
+        const renderUI = (items, totalValue) => {
+            // 1. 更新統計
             document.getElementById('stat-total').innerText = items.length;
             document.getElementById('stat-value').innerText = `$${totalValue.toLocaleString()}`;
 
-            // 更新畫廊
-            const galleryGrid = document.getElementById('gallery-grid');
+            // 2. 更新控制台最近入庫 (前 4 個)
             const recentList = document.getElementById('recent-items-list');
-            galleryGrid.innerHTML = '';
-            recentList.innerHTML = '';
+            if (items.length > 0) {
+                recentList.innerHTML = items.slice(0, 4).map(item => `
+                    <div class="flex items-center gap-5 p-5 rounded-[2.5rem] bg-white border border-[#F0EDFF] hover:shadow-xl transition-all group cursor-pointer">
+                        <img src="${item.image}" class="w-16 h-16 rounded-2xl object-cover shadow-sm">
+                        <div class="flex-1 overflow-hidden">
+                            <h4 class="text-sm font-black text-[#504A8E] truncate">${item.name}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[9px] font-bold bg-[#F6F4FF] text-[#B2A4FF] px-2 py-0.5 rounded-full uppercase">
+                                    ${item.type === 'novel' ? '精選小說' : '珍稀週邊'}
+                                </span>
+                                <span class="text-[10px] text-slate-300 font-bold">$${Number(item.price).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-[#F6F4FF] transition-all">
+                            <i class="fas fa-chevron-right text-[#DED9FF] group-hover:text-[#B2A4FF]"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
-            items.forEach(item => {
-                const cardHtml = `
-                    <div class="group bg-white rounded-[2rem] overflow-hidden border border-[#F0EDFF] hover:border-[#B2A4FF] transition-all-500 card-hover">
+            // 3. 更新藝廊
+            const galleryGrid = document.getElementById('gallery-grid');
+            if (items.length === 0) {
+                galleryGrid.innerHTML = `<div class="col-span-full text-center py-20 text-[#A69DCC] font-bold">目前沒有藏品</div>`;
+            } else {
+                galleryGrid.innerHTML = items.map(item => `
+                    <div class="group bg-white rounded-[2.5rem] overflow-hidden border border-[#F0EDFF] hover:border-[#B2A4FF] transition-all-500 card-hover">
                         <div class="aspect-[3/4] relative overflow-hidden bg-[#F6F4FF]">
-                            <img src="${item.image || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover">
+                            <img src="${item.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                             <div class="absolute top-4 left-4">
-                                <span class="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl shadow-lg bg-[#B2A4FF]/90 text-white">
+                                <span class="text-[9px] font-black uppercase tracking-tighter px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md bg-white/80 text-[#B2A4FF]">
                                     ${item.type === 'novel' ? '小說' : '週邊'}
                                 </span>
                             </div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#4A447F]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                <button onclick="deleteItem('${item.id}')" class="w-full py-2.5 bg-rose-500/90 backdrop-blur rounded-xl text-white font-bold text-xs hover:bg-rose-600 transition-colors">
+                                    移除藏品
+                                </button>
+                            </div>
                         </div>
-                        <div class="p-5">
-                            <h3 class="font-black text-[#4A447F] text-sm truncate mb-2">${item.name}</h3>
+                        <div class="p-6">
+                            <h3 class="font-black text-[#4A447F] text-sm truncate mb-1">${item.name}</h3>
                             <p class="text-xs font-black text-[#B2A4FF]">$${Number(item.price).toLocaleString()}</p>
                         </div>
                     </div>
-                `;
-                galleryGrid.innerHTML += cardHtml;
-            });
-
-            // 最近收藏 (取前 4 個)
-            items.slice(0, 4).forEach(item => {
-                const rowHtml = `
-                    <div class="flex items-center gap-4 p-5 rounded-[2rem] bg-white border border-[#F0EDFF] hover:shadow-xl transition-all group">
-                        <img src="${item.image}" class="w-16 h-16 rounded-2xl object-cover">
-                        <div class="flex-1">
-                            <h4 class="text-sm font-black text-[#504A8E]">${item.name}</h4>
-                            <span class="text-[9px] font-bold bg-[#F6F4FF] text-[#B2A4FF] px-2 py-0.5 rounded-full uppercase">${item.type}</span>
-                        </div>
-                        <i class="fas fa-chevron-right text-[#DED9FF]"></i>
-                    </div>
-                `;
-                recentList.innerHTML += rowHtml;
-            });
+                `).join('');
+            }
         };
 
-        // --- 核心功能: 圖片轉 Base64 ---
+        // --- 圖片處理 (FileReader to Base64) ---
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
+            if (!file) return;
+
+            // 檢查大小 (Firestore 文件限制 1MB)
+            if (file.size > 800000) {
+                alert("圖片太大了！請上傳小於 800KB 的照片以確保系統流暢。");
+                this.value = '';
+                return;
+            }
+
             const reader = new FileReader();
+            document.getElementById('upload-status-text').innerText = "處理中...";
+            
             reader.onloadend = () => {
                 base64Image = reader.result;
-                alert("圖片準備就緒！");
+                const preview = document.getElementById('upload-preview-img');
+                preview.src = base64Image;
+                preview.style.display = 'block';
+                document.getElementById('upload-status-text').innerText = "照片已就緒 √";
             };
             reader.readAsDataURL(file);
         });
 
-        // --- 核心功能: 上傳資料 ---
+        // --- 上傳功能 ---
         window.handleUpload = async () => {
-            if (!currentUser) return alert("請先登入！");
+            if (!currentUser) return alert("請先登入 Google 帳號！");
             
             const name = document.getElementById('new-item-name').value;
             const type = document.getElementById('new-item-type').value;
             const price = document.getElementById('new-item-price').value;
+            const btn = document.getElementById('btn-submit');
 
-            if (!name || !price || !base64Image) return alert("請填寫完整資訊並選擇圖片");
+            if (!name || !price || !base64Image) {
+                return alert("請填寫名稱、價格並上傳一張精美的照片！");
+            }
 
             try {
+                btn.disabled = true;
+                btn.innerHTML = `<div class="loading-spinner"></div> 上傳中...`;
+
                 await addDoc(collection(db, "collections"), {
                     name,
                     type,
@@ -323,30 +440,69 @@
                     userId: currentUser.uid,
                     createdAt: serverTimestamp()
                 });
-                // 清空欄位
+
+                // 重置表單
                 document.getElementById('new-item-name').value = '';
                 document.getElementById('new-item-price').value = '';
+                document.getElementById('upload-preview-img').style.display = 'none';
+                document.getElementById('upload-status-text').innerText = "選擇照片 (Base64)";
                 base64Image = null;
-                alert("收藏成功！");
+                
+                alert("成功入庫！藏品已同步至雲端。");
             } catch (e) {
-                alert("上傳失敗: " + e.message);
+                console.error(e);
+                alert("上傳失敗，請檢查網路連線。");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>確認上傳</span>`;
             }
         };
 
-        // 監聽 Auth 狀態
+        // --- 刪除功能 ---
+        window.deleteItem = async (itemId) => {
+            if (confirm("確定要從藏館中移除這件寶貝嗎？此動作無法復原。")) {
+                try {
+                    await deleteDoc(doc(db, "collections", itemId));
+                } catch (e) {
+                    alert("移除失敗：" + e.message);
+                }
+            }
+        };
+
+        // --- 監聽 Auth 狀態 ---
         onAuthStateChanged(auth, (user) => {
+            const sidebarAuth = document.getElementById('auth-sidebar-section');
+            const profileHeader = document.getElementById('user-profile-header');
+            
             if (user) {
                 currentUser = user;
-                document.getElementById('user-profile').classList.remove('hidden');
+                // 更新頭部 UI
+                profileHeader.classList.remove('hidden');
                 document.getElementById('user-avatar').src = user.photoURL;
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-greeting').innerText = `哈囉 ${user.displayName.split(' ')[0]}，今天也要好好愛護收藏喔！`;
-                document.getElementById('auth-section').innerHTML = `
-                    <button onclick="logout()" class="w-full py-4 bg-white text-rose-400 border border-rose-100 rounded-[1.25rem] font-black text-sm hover:bg-rose-50 transition-all">
-                        登出帳號
+                
+                // 更新側邊欄按鈕
+                sidebarAuth.innerHTML = `
+                    <div class="p-5 bg-white rounded-3xl border border-[#F0EDFF] text-center mb-4">
+                        <p class="text-[10px] font-bold text-[#A69DCC] mb-3 uppercase">雲端同步中</p>
+                        <button onclick="logout()" class="w-full py-3 bg-rose-50 text-rose-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all">
+                            登出帳號
+                        </button>
+                    </div>
+                `;
+
+                // 開始監聽資料
+                startDataSync(user);
+            } else {
+                currentUser = null;
+                profileHeader.classList.add('hidden');
+                document.getElementById('user-greeting').innerText = "歡迎使用，請先登入以開啟數位藏館。";
+                sidebarAuth.innerHTML = `
+                    <button onclick="loginWithGoogle()" class="w-full py-4 bg-[#B2A4FF] text-white rounded-[1.25rem] font-black text-sm shadow-lg shadow-indigo-100 hover:bg-[#9988FF] transition-all">
+                        <i class="fab fa-google mr-2"></i> Google 登入
                     </button>
                 `;
-                listenToCollection(user);
             }
         });
     </script>
